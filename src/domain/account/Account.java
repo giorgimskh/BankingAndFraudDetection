@@ -105,5 +105,15 @@ public abstract class  Account {
             setAccountStatus(AccountStatus.FROZEN);
     }
 
+    public void unfreeze(){
+        if(this.accountStatus.equals(AccountStatus.FROZEN))
+            setAccountStatus(AccountStatus.ACTIVE);
+    }
+
+    public void close(){
+        if(!this.accountStatus.equals(AccountStatus.CLOSED) && this.getBalance().isZero())
+            setAccountStatus(AccountStatus.CLOSED);
+    }
+
 
 }
