@@ -1,0 +1,249 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+' =========================
+' Packages
+' =========================
+package "domain.customer" {
+  class Customer {
+    - UUID id
+    - String fullName
+    - List<Account> accounts
+    - List<Card> cards
+    + openAccount(type: AccountType, currency: Currency): Account
+    + addCard(account: Account, type: CardType): Card
+  }
+}
+
+package "domain.account" {
+
+  enum AccountStatus {
+    ACTIVE
+    FROZEN
+    CLOSED
+  }
+
+  enum AccountType {
+    CHECKING
+    SAVINGS
+  }
+
+  enum Currency {
+    EUR
+    USD
+    GEL
+  }
+
+  abstract class Account {
+    - UUID id
+    - Customer owner
+    - Money balance
+    - Currency currency
+    - AccountStatus status
+    + deposit(amount: Money)
+    + withdraw(amount: Money, channel: Channel, context: TxContext): Transaction
+    # canWithdraw(amount: Money): boolean
+    # onTransaction(tx: Transaction)
+  }
+
+  class CheckingAccount {
+    - Money overdraftLimit
+    # canWithdraw(amount: Money): boolean
+  }
+
+  class SavingsAccount {
+    - double dailyWithdrawalLimit
+    # canWithdraw(amount: Money): boolean
+  }
+
+  Account <|-- CheckingAccount
+  Account <|-- SavingsAccount
+}
+
+package "domain.card" {
+
+  enum CardStatus {
+    ACTIVE
+    BLOCKED
+    EXPIRED
+  }
+
+  enum CardType {
+    DEBIT
+    CREDIT
+  }
+
+  class Card {
+    - UUID id
+    - Customer owner
+    - Account linkedAccount
+    - String last4
+    - CardStatus status
+    + block(reason: String)
+    + charge(amount: Money, merchant: String, context: TxContext): Transaction
+  }
+}
+
+package "domain.transaction" {
+
+  enum TxType {
+    DEPOSIT
+    WITHDRAWAL
+    CARD_CHARGE
+    TRANSFER
+  }
+
+  enum TxStatus {
+    APPROVED
+    DECLINED
+    PENDING
+  }
+
+  enum Channel {
+    ATM
+    POS
+    ONLINE
+    BRANCH
+    TRANSFER
+  }
+
+  class Transaction {
+    - UUID id
+    - TxType type
+    - TxStatus status
+    - Money amount
+    - Instant timestamp
+    - String description
+    - String merchant
+    - String location
+    + approve()
+    + decline(reason: String)
+  }
+
+  class TxContext {
+    - String ip
+    - String deviceId
+    - String geoCountry
+    - String city
+    - boolean isTrustedDevice
+  }
+}
+
+package "rules" {
+
+  enum Severity {
+    INFO
+    WARN
+    BLOCK
+  }
+
+  class RuleResult {
+    - boolean allowed
+    - Severity severity
+    - String message
+  }
+
+  interface FraudRule {
+    + evaluate(account: Account, tx: Transaction, context: TxContext): RuleResult
+    + name(): String
+  }
+
+  class RuleEngine {
+    - List<FraudRule> rules
+    + evaluateAll(account: Account, tx: Transaction, context: TxContext): List<RuleResult>
+    + isAllowed(results: List<RuleResult>): boolean
+  }
+
+  class VelocityRule
+  class AmountThresholdRule
+  class GeoMismatchRule
+
+  FraudRule <|.. VelocityRule
+  FraudRule <|.. AmountThresholdRule
+  FraudRule <|.. GeoMismatchRule
+}
+
+package "service" {
+
+  class BankService {
+    - AccountRepository accountRepo
+    - CustomerRepository customerRepo
+    - TransactionRepository txRepo
+    - RuleEngine ruleEngine
+    + openAccount(customerId: UUID, type: AccountType, currency: Currency): Account
+    + issueCard(customerId: UUID, accountId: UUID, type: CardType): Card
+    + deposit(accountId: UUID, amount: Money): Transaction
+    + withdraw(accountId: UUID, amount: Money, channel: Channel, context: TxContext): Transaction
+    + transfer(fromId: UUID, toId: UUID, amount: Money, context: TxContext): Transaction
+  }
+}
+
+package "storage" {
+
+  interface CustomerRepository {
+    + save(customer: Customer)
+    + findById(id: UUID): Customer
+  }
+
+  interface AccountRepository {
+    + save(account: Account)
+    + findById(id: UUID): Account
+  }
+
+  interface TransactionRepository {
+    + save(tx: Transaction)
+    + findByAccount(accountId: UUID): List<Transaction>
+  }
+
+  class InMemoryCustomerRepository
+  class InMemoryAccountRepository
+  class InMemoryTransactionRepository
+
+  CustomerRepository <|.. InMemoryCustomerRepository
+  AccountRepository <|.. InMemoryAccountRepository
+  TransactionRepository <|.. InMemoryTransactionRepository
+}
+
+package "util" {
+
+  class Money {
+    - BigDecimal amount
+    - Currency currency
+    + add(other: Money): Money
+    + subtract(other: Money): Money
+    + isNegative(): boolean
+    + compareTo(other: Money): int
+  }
+
+  interface Clock {
+    + now(): Instant
+  }
+
+  class SystemClock
+
+  Clock <|.. SystemClock
+}
+
+package "exceptions" {
+
+  class DomainException
+  class InsufficientFundsException
+  class AccountFrozenException
+  class FraudDeclinedException
+
+  DomainException <|-- InsufficientFundsException
+  DomainException <|-- AccountFrozenException
+  DomainException <|-- FraudDeclinedException
+}
+
+' =========================
+' Relationships
+' =========================
+Customer "1" o-- "0..*" Account
+Customer "1" o-- "0..*" Card
+Card --> Account
+Transaction --> Account
+RuleEngine o-- FraudRule
+BankService --> RuleEngine
+
+@enduml
