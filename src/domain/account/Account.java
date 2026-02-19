@@ -94,8 +94,10 @@ public abstract class  Account {
             throw new IllegalStateException("Account must not be closed ");
         if(this.balance.getCurrency()!=money.getCurrency())
             throw new CurrencyMismatchException("Currencies mismatched");
-        if(canWithdraw(money))
-            this.balance.subtract(money);
+        if(!canWithdraw(money))
+            throw new IllegalArgumentException("Invalid operation");
+
+        this.balance.subtract(money);
     }
 
     protected abstract boolean canWithdraw(Money amount) throws CurrencyMismatchException;
