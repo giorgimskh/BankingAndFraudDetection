@@ -9,7 +9,7 @@ import java.util.Objects;
 public final class Money implements Comparable<Money> {
     private static final int SCALE = 2;
 
-    private final BigDecimal amount;
+    private BigDecimal amount;
     private final Currency currency;
 
     public Money(BigDecimal amount, Currency currency) {
@@ -39,19 +39,19 @@ public final class Money implements Comparable<Money> {
         }
     }
 
-    public Money add(Money other) throws CurrencyMismatchException {
+    public void add(Money other) throws CurrencyMismatchException {
         requireSameCurrency(other);
-        return new Money(this.amount.add(other.amount), this.currency);
+        this.amount=this.amount.add(other.getAmount());
     }
 
-    public Money subtract(Money other) throws CurrencyMismatchException {
+    public void subtract(Money other) throws CurrencyMismatchException {
         requireSameCurrency(other);
-        return new Money(this.amount.subtract(other.amount), this.currency);
+        this.amount=this.amount.subtract(other.getAmount());
     }
 
-    public Money multiply(BigDecimal factor) {
-        if (factor == null) throw new IllegalArgumentException("Factor cannot be null");
-        return new Money(this.amount.multiply(factor), this.currency);
+    public void multiply(BigDecimal factor){
+        if(factor==null) throw new IllegalArgumentException("Factor cannot be null");
+        this.amount=this.amount.multiply(factor);
     }
 
     public boolean isZero() {
