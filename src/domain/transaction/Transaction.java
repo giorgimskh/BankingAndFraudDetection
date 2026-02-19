@@ -1,4 +1,4 @@
-package domain;
+package domain.transaction;
 
 public class Transaction {
 }
