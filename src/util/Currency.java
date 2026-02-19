@@ -1,4 +1,4 @@
 package util;
 
-public class Currency {
+public enum Currency {
 }
