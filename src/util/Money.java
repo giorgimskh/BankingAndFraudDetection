@@ -1,5 +1,7 @@
 package util;
 
+import exception.CurrencyMismatchException;
+
 import java.math.BigDecimal;
 
 public class Money  implements  Comparable<Money>{
@@ -23,6 +25,17 @@ public class Money  implements  Comparable<Money>{
     public Currency getCurrency() {
         return currency;
     }
+
+    public Money add(Money other) throws CurrencyMismatchException {
+        if(!this.currency.toString().equals(other.currency.toString())) {
+            throw new CurrencyMismatchException("Currency mismatched");
+        }
+
+        return new Money(this.amount.add(other.amount),this.currency);
+    }
+
+
+
 
     @Override
     public int compareTo(Money o) {
