@@ -6,15 +6,18 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 
-public final class Money implements Comparable<Money> {
+public final class Money  implements Comparable<Money> {
     private static final int SCALE = 2;
 
     private BigDecimal amount;
     private final Currency currency;
 
     public Money(BigDecimal amount, Currency currency) {
-        if (amount == null) throw new IllegalArgumentException("Amount cannot be null");
+        if (amount == null || amount.compareTo(BigDecimal.ZERO)<=0) {
+            throw new IllegalArgumentException("Amount cannot be null");
+        }
         if (currency == null) throw new IllegalArgumentException("Currency cannot be null");
+        if(this.isNegative())
 
         this.amount = amount.setScale(SCALE, RoundingMode.HALF_UP);
         this.currency = currency;
