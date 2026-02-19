@@ -32,19 +32,19 @@ public final class Money implements Comparable<Money> {
         return currency;
     }
 
-    private void requireSameCurrency(Money other) {
-        if (other == null) throw new IllegalArgumentException("Other money cannot be null");
+    private void requireSameCurrency(Money other) throws CurrencyMismatchException {
+        if (other == null) throw new IllegalArgumentException("money cannot be null");
         if (!this.currency.equals(other.currency)) {
-            throw new CurrencyMismatchException("Currency mismatch: " + this.currency + " vs " + other.currency);
+            throw new CurrencyMismatchException("Currency mismatch");
         }
     }
 
-    public Money add(Money other) {
+    public Money add(Money other) throws CurrencyMismatchException {
         requireSameCurrency(other);
         return new Money(this.amount.add(other.amount), this.currency);
     }
 
-    public Money subtract(Money other) {
+    public Money subtract(Money other) throws CurrencyMismatchException {
         requireSameCurrency(other);
         return new Money(this.amount.subtract(other.amount), this.currency);
     }
@@ -68,7 +68,11 @@ public final class Money implements Comparable<Money> {
 
     @Override
     public int compareTo(Money other) {
-        requireSameCurrency(other);
+        try {
+            requireSameCurrency(other);
+        } catch (CurrencyMismatchException e) {
+            throw new RuntimeException(e);
+        }
         return this.amount.compareTo(other.amount);
     }
 
