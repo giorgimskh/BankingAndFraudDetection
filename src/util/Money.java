@@ -16,6 +16,14 @@ public class Money  implements  Comparable<Money>{
         this.currency = currency;
     }
 
+    public BigDecimal getAmount() {
+        return amount;
+    }
+
+    public Currency getCurrency() {
+        return currency;
+    }
+
     @Override
     public int compareTo(Money o) {
         return 0;
