@@ -31,7 +31,7 @@ public abstract class  Account {
         this.accountStatus=accountStatus;
     }
 
-    public Account(UUID id, Customer owner,  Currency currency, AccountStatus accountStatus, AccountType accountType) {
+    public Account(Customer owner,  Currency currency, AccountStatus accountStatus, AccountType accountType) {
         if(owner==null)
             throw new IllegalArgumentException("owner cant be null");
         if(balance.getCurrency()!=currency)
@@ -39,7 +39,7 @@ public abstract class  Account {
         if(accountStatus==null)
             throw new IllegalArgumentException("account status cant be null");
 
-        this.id = id;
+        this.id = UUID.randomUUID();
         this.owner = owner;
         this.balance = new Money(BigDecimal.ZERO,currency);
         this.currency = currency;
@@ -98,7 +98,7 @@ public abstract class  Account {
             this.balance.subtract(money);
     }
 
-    protected abstract boolean canWithdraw(Money amount);
+    protected abstract boolean canWithdraw(Money amount) throws CurrencyMismatchException;
 
     public void freeze(){
         if(this.accountStatus.equals(AccountStatus.ACTIVE))
