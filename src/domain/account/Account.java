@@ -89,7 +89,21 @@ public abstract class  Account {
         this.balance.add(money);
     }
 
+    public void withdraw(Money money) throws CurrencyMismatchException {
+        if(!accountStatus.equals(AccountStatus.CLOSED))
+            throw new IllegalStateException("Account must not be closed ");
+        if(this.balance.getCurrency()!=money.getCurrency())
+            throw new CurrencyMismatchException("Currencies mismatched");
+        if(canWithdraw(money))
+            this.balance.subtract(money);
+    }
 
+    protected abstract boolean canWithdraw(Money amount);
+
+    public void freeze(){
+        if(this.accountStatus.equals(AccountStatus.ACTIVE))
+            setAccountStatus(AccountStatus.FROZEN);
+    }
 
 
 }
