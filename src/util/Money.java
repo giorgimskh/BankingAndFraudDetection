@@ -34,6 +34,14 @@ public class Money  implements  Comparable<Money>{
         return new Money(this.amount.add(other.amount),this.currency);
     }
 
+    public Money subtract(Money other) throws CurrencyMismatchException {
+        if(!this.currency.equals(other.currency)){
+            throw new CurrencyMismatchException("Currency mismatched");
+        }
+
+        return new Money(this.amount.subtract(other.amount),this.currency);
+    }
+
 
 
 
