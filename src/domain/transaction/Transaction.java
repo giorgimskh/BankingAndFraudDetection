@@ -1,5 +1,6 @@
 package domain.transaction;
 
+import exception.CurrencyMismatchException;
 import util.Money;
 
 import java.time.Instant;
@@ -12,7 +13,7 @@ public abstract class Transaction {
     private  TransactionStatus status;
     private final String description;
 
-    public Transaction(Money amount, TransactionStatus status, String description) {
+    public Transaction(Money amount, String description) {
         if(amount==null)
             throw new IllegalStateException("Amount cannot be null");
         if(!amount.isPositive())
@@ -26,7 +27,7 @@ public abstract class Transaction {
     }
 
     public abstract TransactionType type();
-    public abstract void apply();
+    public abstract void apply() throws CurrencyMismatchException;
 
     public void approve(){
         canBeModified();
