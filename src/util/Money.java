@@ -13,11 +13,10 @@ public final class Money  implements Comparable<Money> {
     private final Currency currency;
 
     public Money(BigDecimal amount, Currency currency) {
-        if (amount == null || amount.compareTo(BigDecimal.ZERO)<=0) {
+        if (amount == null || amount.compareTo(BigDecimal.ZERO)<0) {
             throw new IllegalArgumentException("Amount cannot be null");
         }
         if (currency == null) throw new IllegalArgumentException("Currency cannot be null");
-        if(this.isNegative())
 
         this.amount = amount.setScale(SCALE, RoundingMode.HALF_UP);
         this.currency = currency;
@@ -35,10 +34,10 @@ public final class Money  implements Comparable<Money> {
         return currency;
     }
 
-    private void requireSameCurrency(Money other) throws CurrencyMismatchException {
+    private void requireSameCurrency(Money other)  {
         if (other == null) throw new IllegalArgumentException("money cannot be null");
         if (!this.currency.equals(other.currency)) {
-            throw new CurrencyMismatchException("Currency mismatch");
+            throw new IllegalArgumentException("Currency mismatch");
         }
     }
 
@@ -54,11 +53,21 @@ public final class Money  implements Comparable<Money> {
 
     public void subtract(Money other) throws CurrencyMismatchException {
         requireSameCurrency(other);
+
+        if (this.amount.compareTo(other.getAmount()) < 0) {
+            throw new IllegalArgumentException("Resulting money cannot be negative");
+        }
+
         this.amount=this.amount.subtract(other.getAmount());
     }
 
     public Money subtractMoney(Money other) throws CurrencyMismatchException {
         requireSameCurrency(other);
+
+        if (this.amount.compareTo(other.getAmount()) < 0) {
+            throw new IllegalArgumentException("Resulting money cannot be negative");
+        }
+
         return new Money(this.amount.subtract(other.getAmount()),other.currency);
     }
 
@@ -83,8 +92,8 @@ public final class Money  implements Comparable<Money> {
     public int compareTo(Money other) {
         try {
             requireSameCurrency(other);
-        } catch (CurrencyMismatchException e) {
-            throw new RuntimeException(e);
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException(e);
         }
         return this.amount.compareTo(other.amount);
     }
