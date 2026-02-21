@@ -30,4 +30,11 @@ public class Withdrawal extends Transaction {
     public void apply() throws CurrencyMismatchException {
         from.withdraw(getAmount());
     }
+
+    @Override
+    public boolean involves(Account account) {
+        if(account==null)
+            throw new IllegalArgumentException("Account cant be null");
+        return from.equals(account);
+    }
 }
