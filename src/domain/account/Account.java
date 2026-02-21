@@ -6,6 +6,7 @@ import util.Currency;
 import util.Money;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 
 public abstract class  Account {
@@ -29,13 +30,12 @@ public abstract class  Account {
         this.currency=currency;
         this.accountType=accountType;
         this.accountStatus=accountStatus;
+        this.balance=balance;
     }
 
     public Account(Customer owner,  Currency currency, AccountStatus accountStatus, AccountType accountType) {
         if(owner==null)
             throw new IllegalArgumentException("owner cant be null");
-        if(balance.getCurrency()!=currency)
-            throw new IllegalArgumentException("Currencies does not match");
         if(accountStatus==null)
             throw new IllegalArgumentException("account status cant be null");
 
@@ -118,4 +118,17 @@ public abstract class  Account {
     }
 
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Account)) return false;
+
+         Account account = (Account) o;
+        return id.equals(account.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
