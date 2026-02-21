@@ -6,9 +6,7 @@ import domain.transaction.TransactionStatus;
 import domain.transaction.Transfer;
 import exception.CurrencyMismatchException;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 public class Ledger {
     private final List<Transaction> history;
@@ -17,7 +15,7 @@ public class Ledger {
        history=new ArrayList<>();
     }
 
-    public void post(Transaction tx) throws CurrencyMismatchException {
+    public void post(Transaction tx)  {
         if(tx==null)
             throw new IllegalArgumentException("Transaction cant be null");
         if(tx.getStatus()!= TransactionStatus.APPROVED)
@@ -25,14 +23,18 @@ public class Ledger {
         if(isPosted(tx.getId()))
             throw new IllegalArgumentException("This transaction is already done");
 
-        tx.apply();
-        tx.markPosted();
-        history.add(tx);
+        try {
+            tx.apply();
+            tx.markPosted();
+            history.add(tx);
+        } catch (CurrencyMismatchException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
     public List<Transaction> getHistory() {
-        return history;
+        return Collections.unmodifiableList(history);
     }
 
     public boolean isPosted(UUID txId) {
@@ -47,7 +49,7 @@ public class Ledger {
         return false;
     }
 
-    /*
+
     public List<Transaction> statementFor(Account account){
         if(account==null)
             throw new IllegalArgumentException("Account cannot be null");
@@ -57,8 +59,7 @@ public class Ledger {
             if(tx.involves(account))
                 involvedIn.add(tx);
         }
-
         return involvedIn;
     }
-     */
+
 }
