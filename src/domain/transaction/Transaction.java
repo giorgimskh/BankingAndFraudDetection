@@ -57,6 +57,10 @@ public abstract class Transaction {
         this.status=TransactionStatus.POSTED;
     }
 
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
+    }
+
     public void canBeModified(){
         if(this.status==TransactionStatus.POSTED) {
             throw new IllegalStateException("Transaction  cannot be modified");
