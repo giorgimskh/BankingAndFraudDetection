@@ -37,7 +37,7 @@ public class CheckingAccount extends Account {
         if(amount==null)
             throw new IllegalArgumentException("Amount cannot be null");
 
-        Money available=getOverdraftLimit().addMoney(overdraftLimit);
+        Money available=getBalance().addMoney(getOverdraftLimit());
         return available.compareTo(amount)>=0;
     }
 

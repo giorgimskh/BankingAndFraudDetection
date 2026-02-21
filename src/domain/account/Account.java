@@ -90,7 +90,7 @@ public abstract class  Account {
     }
 
     public void withdraw(Money money) throws CurrencyMismatchException {
-        if(!accountStatus.equals(AccountStatus.CLOSED))
+        if(accountStatus==AccountStatus.CLOSED)
             throw new IllegalStateException("Account must not be closed ");
         if(this.balance.getCurrency()!=money.getCurrency())
             throw new CurrencyMismatchException("Currencies mismatched");
