@@ -1,5 +1,6 @@
 package domain.transaction;
 
+import domain.account.Account;
 import exception.CurrencyMismatchException;
 import util.Money;
 
@@ -28,6 +29,7 @@ public abstract class Transaction {
 
     public abstract TransactionType type();
     public abstract void apply() throws CurrencyMismatchException;
+    public abstract boolean involves(Account account);
 
     public void approve(){
         canBeModified();
