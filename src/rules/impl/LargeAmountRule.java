@@ -9,20 +9,20 @@ import util.Money;
 
 public class LargeAmountRule implements FraudRule {
     private final Money threshold;
-    private final Decision DecisionOnHit;
+    private final Decision decisionOnHit;
 
     public LargeAmountRule(Money threshold, Decision decisionOnHit) {
         if(threshold==null)
             throw new IllegalArgumentException("Threshold cant be Null");
         if(!threshold.isPositive())
-            throw new IllegalArgumentException("Threshold must be negative");
+            throw new IllegalArgumentException("Threshold must be positive");
         if(decisionOnHit==null)
             throw new IllegalArgumentException("DecisionOnHit cant be Null");
         if(decisionOnHit==Decision.ALLOW)
             throw new IllegalArgumentException("DecisionOnHit should not be Allow");
 
         this.threshold = threshold;
-        this.DecisionOnHit = decisionOnHit;
+        this.decisionOnHit = decisionOnHit;
     }
 
 
@@ -33,12 +33,10 @@ public class LargeAmountRule implements FraudRule {
         if(ctx==null)
             throw new IllegalArgumentException("FraudContext cant be Null");
         if(tx.getAmount().getCurrency()!=threshold.getCurrency())
-            return RuleResult.review("LargeAmountRule skipped:Currency mismatched");
+            return RuleResult.allow();
         if(tx.getAmount().compareTo(threshold)>0){
-            if(DecisionOnHit==Decision.BLOCK)
-                return RuleResult.block("Large Amount: "+tx.getAmount()+" > "+threshold);
-            else
-                return RuleResult.review("Large Amount: "+tx.getAmount()+" > "+threshold);
+            String msg = "Large Amount: " + tx.getAmount() + " > " + threshold;
+            return (decisionOnHit == Decision.BLOCK) ? RuleResult.block(msg) : RuleResult.review(msg);
         }
         return RuleResult.allow();
     }
@@ -48,6 +46,6 @@ public class LargeAmountRule implements FraudRule {
     }
 
     public Decision getDecisionOnHit() {
-        return DecisionOnHit;
+        return decisionOnHit;
     }
 }
