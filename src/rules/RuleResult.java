@@ -24,9 +24,27 @@ public class RuleResult {
     }
 
     public static RuleResult block(){
-        return new RuleResult(Decision.BLOCK, block().reason);
+        return new RuleResult(Decision.BLOCK, block().getReason());
     }
 
+    public static boolean isAllow(RuleResult result){
+        return result.decision==Decision.ALLOW;
+    }
 
+    public static boolean isReview(RuleResult result){
+        return result.decision==Decision.REVIEW;
+    }
+
+    public static boolean isBlock(RuleResult result){
+        return result.decision==Decision.BLOCK;
+    }
+
+    public Decision getDecision() {
+        return decision;
+    }
+
+    public String getReason() {
+        return reason;
+    }
 
 }
