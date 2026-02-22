@@ -2,6 +2,9 @@ package rules;
 
 import domain.customer.Customer;
 import domain.transaction.Transaction;
+import exception.CurrencyMismatchException;
+import util.Currency;
+import util.Money;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -48,6 +51,24 @@ public class FraudContext {
         return List.copyOf(withinMinutesList);
 
     }
+
+    public Money sumWithinMinutes(int minutes, Currency currency) throws CurrencyMismatchException {
+        if(currency==null)
+            throw new IllegalArgumentException("Currency cant be null");
+
+        List<Transaction> txs=withinMinutes(minutes);
+        Money total=Money.zero(currency);
+
+
+            for (Transaction tx : txs) {
+                Money a=tx.getAmount();
+                if(a.getCurrency()==currency)
+                    total=total.addMoney(a);
+            }
+
+         return total;
+    }
+
     public Customer getCustomer() {
         return customer;
     }
