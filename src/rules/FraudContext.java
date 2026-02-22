@@ -3,7 +3,9 @@ package rules;
 import domain.customer.Customer;
 import domain.transaction.Transaction;
 
+import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FraudContext {
@@ -25,8 +27,6 @@ public class FraudContext {
     public List<Transaction> lastN(int n){
         if(n<=0)
             throw new IllegalArgumentException("n must be positive");
-        if(postedHistory.size()<n)
-            return getPostedHistory();
 
         int size= getPostedHistory().size();
         int from=Math.max(0,size-n);
@@ -34,6 +34,20 @@ public class FraudContext {
         return getPostedHistory().subList(from,size);
     }
 
+    public List<Transaction> withinMinutes(int minutes){
+        if(minutes<=0)
+            throw new IllegalArgumentException("Minutes must be positive");
+
+        List<Transaction> withinMinutesList=new ArrayList<>();
+        Instant cutOff=now.minus(Duration.ofMinutes(minutes));
+
+        for(Transaction tx:postedHistory){
+           if(!tx.getCreatedAt().isBefore(cutOff))
+               withinMinutesList.add(tx);
+        }
+        return List.copyOf(withinMinutesList);
+
+    }
     public Customer getCustomer() {
         return customer;
     }
