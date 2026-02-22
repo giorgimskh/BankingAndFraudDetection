@@ -19,4 +19,14 @@ public class RuleResult {
         return new RuleResult(Decision.ALLOW,"");
     }
 
+    public static RuleResult review(){
+            return new RuleResult(Decision.REVIEW,"");
+    }
+
+    public static RuleResult block(){
+        return new RuleResult(Decision.BLOCK, block().reason);
+    }
+
+
+
 }
