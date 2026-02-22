@@ -34,7 +34,7 @@ public class FraudContext {
         int size= getPostedHistory().size();
         int from=Math.max(0,size-n);
 
-        return getPostedHistory().subList(from,size);
+        return postedHistory.subList(from,size);
     }
 
     public List<Transaction> withinMinutes(int minutes){
@@ -67,6 +67,20 @@ public class FraudContext {
             }
 
          return total;
+    }
+
+    public int countWithinMinutes(int minutes){
+        return withinMinutes(minutes).size();
+    }
+
+    public boolean hasAnyTransaction(){
+        return !postedHistory.isEmpty();
+    }
+
+    public Transaction mostRecent(){
+       if(postedHistory.isEmpty())
+           throw new IllegalStateException("No transactions in history");
+       return postedHistory.getLast();
     }
 
     public Customer getCustomer() {
