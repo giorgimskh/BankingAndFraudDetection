@@ -1,6 +1,7 @@
 package rules;
 
 import domain.transaction.Transaction;
+import exception.CurrencyMismatchException;
 
 import java.util.List;
 
@@ -15,7 +16,7 @@ public class FraudEngine{
         this.rules = List.copyOf(rules);
     }
 
-    public RuleResult assess(Transaction tx,FraudContext ctx){
+    public RuleResult assess(Transaction tx,FraudContext ctx) throws CurrencyMismatchException {
         if(tx==null)
             throw new IllegalArgumentException("Transaction cant be null");
         if(ctx==null)
