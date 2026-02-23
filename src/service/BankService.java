@@ -35,4 +35,14 @@ public class BankService {
 
         return customers.get(id);
     }
+
+    private Account requireAccount(UUID id){
+        if(id==null)
+            throw new IllegalArgumentException("Id cant be null");
+        if(!accounts.containsKey(id))
+            throw new IllegalArgumentException("Account not found");
+
+        return accounts.get(id);
+    }
+
 }
