@@ -36,6 +36,7 @@ public class BankService {
         return customers.get(id);
     }
 
+    //Checks if account is findable
     private Account requireAccount(UUID id){
         if(id==null)
             throw new IllegalArgumentException("Id cant be null");
@@ -43,6 +44,18 @@ public class BankService {
             throw new IllegalArgumentException("Account not found");
 
         return accounts.get(id);
+    }
+
+    public Customer createCustomer(String fullName){
+        if(fullName==null)
+            throw new IllegalArgumentException("FullName cant be null");
+        if(fullName.isEmpty())
+            throw new IllegalArgumentException("FullName cant be blank");
+
+        Customer c=new Customer(fullName);
+        customers.put(c.getId(),c);
+
+        return c;
     }
 
 }
