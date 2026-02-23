@@ -25,4 +25,14 @@ public class BankService {
         this.ledger = ledger;
         this.fraudEngine = fraudEngine;
     }
+
+    //Checks if customer is findable
+    private Customer requireCustomer(UUID id){
+        if(id==null)
+            throw new IllegalArgumentException("Id cant be null");
+        if(!customers.containsKey(id))
+            throw new IllegalArgumentException("Customer not found");
+
+        return customers.get(id);
+    }
 }
