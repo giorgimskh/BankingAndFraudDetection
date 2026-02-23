@@ -13,7 +13,7 @@ public class Customer {
     private final List<Account>accounts;
     private final List<Card> cards=new ArrayList<>();
 
-    public Customer(String fullName, List<Account> accounts) {
+    public Customer(String fullName) {
         if(fullName==null)
             throw new IllegalArgumentException("Full name must be non-empty");
         if(fullName.isEmpty())
@@ -27,12 +27,23 @@ public class Customer {
     public void addAccount(Account account){
         if(account==null)
             throw new IllegalArgumentException("Account cant be null");
-        if(!account.getOwner().equals(this))
+        if(!account.getOwner().getId().equals(this.id))
             throw new IllegalArgumentException("Owners must match");
         if(accounts.contains(account))
             throw new IllegalArgumentException("Account is already added!");
 
         accounts.add(account);
+    }
+
+    public Account findAccount(UUID accountId){
+        if(accountId==null)
+            throw new IllegalArgumentException("Account cant be null");
+
+        for(Account acc:accounts){
+            if(acc.getId().equals(accountId))
+                return acc;
+        }
+        throw new IllegalArgumentException("Account has not be found");
     }
 
     public UUID getId() {
@@ -44,10 +55,10 @@ public class Customer {
     }
 
     public List<Account> getAccounts() {
-        return accounts;
+        return List.copyOf(accounts);
     }
 
     public List<Card> getCards() {
-        return cards;
+        return List.copyOf(cards);
     }
 }
