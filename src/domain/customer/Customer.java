@@ -5,6 +5,7 @@ import domain.card.Card;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class Customer {
@@ -22,6 +23,27 @@ public class Customer {
         this.id = UUID.randomUUID();
         this.fullName = fullName;
         this.accounts = new ArrayList<>();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Customer)) return false;
+        Customer customer = (Customer) o;
+        return id.equals(customer.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
+    }
+
+    @Override
+    public String toString() {
+        return "Customer{" +
+                "id=" + id +
+                ", fullName='" + fullName + '\'' +
+                '}';
     }
 
     public void addAccount(Account account){
