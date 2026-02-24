@@ -32,11 +32,11 @@ public class RuleResult {
         return new RuleResult(Decision.BLOCK, reason);
     }
 
-    public  boolean isAllow(RuleResult result){
+    public static boolean isAllow(RuleResult result){
         return result.decision==Decision.ALLOW;
     }
 
-    public  boolean isReview(RuleResult result){
+    public static boolean isReview(RuleResult result){
         return result.decision==Decision.REVIEW;
     }
 
