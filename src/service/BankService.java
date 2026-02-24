@@ -5,9 +5,8 @@ import domain.customer.Customer;
 import domain.ledger.Ledger;
 import domain.transaction.Deposit;
 import domain.transaction.Transaction;
+import domain.transaction.Transfer;
 import domain.transaction.Withdrawal;
-import exception.AccountStatusMismatchException;
-import exception.CurrencyMismatchException;
 import rules.FraudContext;
 import rules.FraudEngine;
 import rules.RuleResult;
@@ -105,8 +104,8 @@ public class BankService {
         return List.copyOf(accounts.values());
     }
 
-    public Ledger getLedger() {
-        return ledger;
+    public List<Transaction> getLedger() {
+        return ledger.getHistory();
     }
 
     public FraudEngine getFraudEngine() {
@@ -117,23 +116,27 @@ public class BankService {
         return List.copyOf(attempts);
     }
 
-    public Transaction deposit(UUID accountId, Money amount, String description) throws CurrencyMismatchException {
+    public Transaction deposit(UUID accountId, Money amount, String description){
         Account account=requireAccount(accountId);
         Transaction tx =new Deposit(account,amount,description);
 
-        if(amount.getCurrency()!=account.getCurrency())
-            throw new CurrencyMismatchException("Currency does not match!");
-
-        tx.approve();
-        ledger.post(tx);
+        try{
+            tx.approve();
+            ledger.post(tx);
+        }catch (RuntimeException e){
+            attempts.add(tx);
+            System.out.println(e.getMessage());
+        }
 
         return tx;
     }
 
-    public Transaction withdraw(UUID accountId,Money amount,String description) throws CurrencyMismatchException {
+    public Transaction withdraw(UUID accountId,Money amount,String description){
         Account account=requireAccount(accountId);
         Transaction tx=new Withdrawal(amount,description,account);
-        FraudContext ctx=new FraudContext(account.getOwner(),ledger.statementFor(account));
+
+
+        FraudContext ctx=new FraudContext(account.getOwner(),getCustomerHistory(account.getOwner()));
 
         RuleResult rr=fraudEngine.assess(tx,ctx);
 
@@ -158,24 +161,61 @@ public class BankService {
     public void freezeAccount(UUID accountId){
         try{
             requireAccount(accountId).freeze();
-        }catch (AccountStatusMismatchException e){
+        }catch (RuntimeException e){
             System.out.println(e.getMessage());
         }
     }
 
-    public void closeAccount(UUID accountId) throws AccountStatusMismatchException{
+    public void closeAccount(UUID accountId) {
         try{
             requireAccount(accountId).close();
-        }catch (AccountStatusMismatchException e){
+        }catch (RuntimeException e){
             System.out.println(e.getMessage());
         }
     }
 
-    public void unfreezeAccount(UUID accountId) throws AccountStatusMismatchException{
+    public void unfreezeAccount(UUID accountId){
         try {
             requireAccount(accountId).unfreeze();
-        }catch (AccountStatusMismatchException e){
+        }catch (RuntimeException e){
             System.out.println(e.getMessage());
         }
+    }
+
+    public Transaction transfer(UUID fromAccountId,UUID toAccountId,Money amount,String description){
+        Account to=requireAccount(toAccountId);
+        Account from=requireAccount(fromAccountId);
+        Transfer transfer=new Transfer(amount,description,from,to);
+
+        try{
+            FraudContext ctx=new FraudContext(from.getOwner(),getCustomerHistory(from.getOwner()));
+            RuleResult rr = fraudEngine.assess(transfer,ctx);
+
+            if(RuleResult.isAllow(rr)){
+                transfer.approve();
+                ledger.post(transfer);
+            }else if(RuleResult.isReview(rr)){
+                transfer.markReview();
+                attempts.add(transfer);
+            }else{
+                transfer.decline();
+                attempts.add(transfer);
+            }
+        } catch (RuntimeException e) {
+            System.out.println(e.getMessage());
+        }
+        return transfer;
+    }
+
+    public List<Transaction> getCustomerHistory(Customer customer){
+        if (customer == null) throw new IllegalArgumentException("Customer can't be null");
+
+        List<Transaction> result = new ArrayList<>();
+        for (Transaction tx : ledger.getHistory()) {
+            if (tx.involvesAnyAccountOf(customer)) {
+                result.add(tx);
+            }
+        }
+        return List.copyOf(result);
     }
 }

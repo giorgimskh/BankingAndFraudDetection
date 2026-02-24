@@ -64,21 +64,4 @@ public class Ledger {
         return involvedIn;
     }
 
-    public List<Transaction> getCustomerHistory(Customer customer){
-        if (customer == null)
-            throw new IllegalArgumentException("Customer can't be null");
-
-        List<Transaction> result = new ArrayList<>();
-
-        for (Transaction tx : history) {
-            for (Account acc : customer.getAccounts()) {
-                if (tx.involves(acc)) {
-                    result.add(tx);
-                    break;
-                }
-            }
-        }
-        return result;
-    }
-
 }
