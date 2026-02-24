@@ -1,10 +1,15 @@
 package service;
 
 import domain.account.Account;
+import domain.account.AccountStatus;
+import domain.account.AccountType;
+import domain.account.CheckingAccount;
 import domain.customer.Customer;
 import domain.ledger.Ledger;
 import domain.transaction.Transaction;
 import rules.FraudEngine;
+import util.Money;
+import util.Currency;
 
 import java.util.*;
 
@@ -67,4 +72,23 @@ public class BankService {
         return List.copyOf(customers.values());
     }
 
+
+    public CheckingAccount openChecking(UUID customerId, Currency currency, Money overdraftLimit){
+        Customer owner=requireCustomer(customerId);
+        CheckingAccount account=new CheckingAccount(owner,currency, AccountStatus.ACTIVE, AccountType.CHECKING,overdraftLimit);
+
+        //adding account into list and then assigning to owner
+        accounts.put(owner.getId(),account);
+        owner.addAccount(account);
+
+        return account;
+    }
+
+    public Ledger getLedger() {
+        return ledger;
+    }
+
+    public FraudEngine getFraudEngine() {
+        return fraudEngine;
+    }
 }
