@@ -38,7 +38,7 @@ public abstract class Transaction {
         this.status=TransactionStatus.APPROVED;
     }
 
-    public void MarkReview(){
+    public void markReview(){
         canBeModified();
         if(status != TransactionStatus.CREATED)
             throw new IllegalStateException("Only Created transaction can be  marked REVIEW!");
@@ -58,6 +58,7 @@ public abstract class Transaction {
             throw new IllegalStateException("Only approved transaction are marked as posted!");
         this.status=TransactionStatus.POSTED;
     }
+
 
     public void setStatus(TransactionStatus status) {
         this.status = status;
