@@ -11,8 +11,10 @@ public class FraudEngine{
     public FraudEngine(List<FraudRule> rules) {
         if(rules.isEmpty())
             throw new IllegalArgumentException("Rules cant  be null");
-        if(rules.contains(null))
-            throw new IllegalArgumentException("Rules list contains null");
+        for (FraudRule rule : rules) {
+            if (rule == null)
+                throw new IllegalArgumentException("Rules list contains null");
+        }
         this.rules = List.copyOf(rules);
     }
 

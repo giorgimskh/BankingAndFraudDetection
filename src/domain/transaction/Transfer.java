@@ -33,9 +33,6 @@ public class Transfer extends Transaction{
 
     @Override
     public void apply() throws CurrencyMismatchException {
-        if(getStatus()==TransactionStatus.APPROVED)
-            throw new IllegalStateException("Transaction already approved");
-
         if (to.getAccountStatus() != AccountStatus.ACTIVE)
             throw new IllegalStateException("Target account must be ACTIVE");
 

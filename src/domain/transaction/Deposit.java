@@ -11,9 +11,11 @@ public class Deposit extends Transaction {
         super(amount,description);
         if(account ==null)
             throw new IllegalArgumentException("account cannot be null");
+        this.to=account;
+
         if(to.getCurrency()!=amount.getCurrency())
             throw new CurrencyMismatchException("Currencies must match");
-        this.to=account;
+
     }
 
 
