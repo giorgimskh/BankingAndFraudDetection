@@ -1,6 +1,7 @@
 package domain.ledger;
 
 import domain.account.Account;
+import domain.customer.Customer;
 import domain.transaction.Transaction;
 import domain.transaction.TransactionStatus;
 import domain.transaction.Transfer;

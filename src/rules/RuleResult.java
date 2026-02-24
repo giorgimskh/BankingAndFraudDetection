@@ -33,15 +33,15 @@ public class RuleResult {
     }
 
     public static boolean isAllow(RuleResult result){
-        return result.decision==Decision.ALLOW;
+        return result.getDecision()==Decision.ALLOW;
     }
 
     public static boolean isReview(RuleResult result){
-        return result.decision==Decision.REVIEW;
+        return result.getDecision()==Decision.REVIEW;
     }
 
     public  boolean isBlock(RuleResult result){
-        return result.decision==Decision.BLOCK;
+        return result.getDecision()==Decision.BLOCK;
     }
 
     public Decision getDecision() {
