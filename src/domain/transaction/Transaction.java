@@ -1,6 +1,7 @@
 package domain.transaction;
 
 import domain.account.Account;
+import domain.customer.Customer;
 import exception.CurrencyMismatchException;
 import util.Money;
 
@@ -88,5 +89,17 @@ public abstract class Transaction {
 
     public String getDescription() {
         return description;
+    }
+
+    public boolean involvesAnyAccountOf(Customer customer) {
+        if (customer == null)
+            throw new IllegalArgumentException("Customer can't be null");
+
+        for (Account acc : customer.getAccounts()) {
+            if (this.involves(acc)) {
+                return true;
+            }
+        }
+        return false;
     }
 }
