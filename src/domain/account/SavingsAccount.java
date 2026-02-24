@@ -22,6 +22,11 @@ public class SavingsAccount extends Account{
     }
 
     public SavingsAccount(Customer owner, Currency currency, AccountStatus accountStatus, AccountType accountType,  int monthlyWithdrawalLimit, Money minimumBalance1) {
+        if(minimumBalance1==null || minimumBalance1.isNegative())
+            throw new IllegalArgumentException("minimum balance should not be null or negative");
+        if(monthlyWithdrawalLimit<=0)
+            throw new IllegalArgumentException("Monthly withdrawal limit should be positive");
+
         super(owner, currency, accountStatus, accountType);
         this.minimumBalance = minimumBalance1;
         this.monthlyWithdrawalLimit = monthlyWithdrawalLimit;
