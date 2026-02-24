@@ -6,6 +6,7 @@ import domain.ledger.Ledger;
 import domain.transaction.Deposit;
 import domain.transaction.Transaction;
 import domain.transaction.Withdrawal;
+import exception.AccountStatusMismatchException;
 import exception.CurrencyMismatchException;
 import rules.FraudContext;
 import rules.FraudEngine;
@@ -148,5 +149,33 @@ public class BankService {
         }
 
         return tx;
+    }
+
+    public List<Transaction> statement(UUID accountId){
+        return ledger.statementFor(requireAccount(accountId));
+    }
+
+    public void freezeAccount(UUID accountId){
+        try{
+            requireAccount(accountId).freeze();
+        }catch (AccountStatusMismatchException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void closeAccount(UUID accountId) throws AccountStatusMismatchException{
+        try{
+            requireAccount(accountId).close();
+        }catch (AccountStatusMismatchException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    public void unfreezeAccount(UUID accountId) throws AccountStatusMismatchException{
+        try {
+            requireAccount(accountId).unfreeze();
+        }catch (AccountStatusMismatchException e){
+            System.out.println(e.getMessage());
+        }
     }
 }

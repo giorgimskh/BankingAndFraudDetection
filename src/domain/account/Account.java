@@ -1,6 +1,7 @@
 package domain.account;
 
 import domain.customer.Customer;
+import exception.AccountStatusMismatchException;
 import exception.CurrencyMismatchException;
 import util.Currency;
 import util.Money;
@@ -102,19 +103,23 @@ public abstract class  Account {
 
     protected abstract boolean canWithdraw(Money amount) throws CurrencyMismatchException;
 
-    public void freeze(){
-        if(this.accountStatus.equals(AccountStatus.ACTIVE))
-            setAccountStatus(AccountStatus.FROZEN);
+    public void freeze()throws AccountStatusMismatchException{
+            if (this.accountStatus != AccountStatus.ACTIVE) {
+                throw new AccountStatusMismatchException("Account must be ACTIVE to freeze");
+            }
+        setAccountStatus(AccountStatus.FROZEN);
     }
 
-    public void unfreeze(){
-        if(this.accountStatus.equals(AccountStatus.FROZEN))
-            setAccountStatus(AccountStatus.ACTIVE);
+    public void unfreeze() throws AccountStatusMismatchException {
+        if(!this.accountStatus.equals(AccountStatus.FROZEN))
+            throw new AccountStatusMismatchException("Account is not frozen");
+        setAccountStatus(AccountStatus.ACTIVE);
     }
 
-    public void close(){
-        if(!this.accountStatus.equals(AccountStatus.CLOSED) && this.getBalance().isZero())
-            setAccountStatus(AccountStatus.CLOSED);
+    public void close() throws AccountStatusMismatchException{
+        if(this.accountStatus.equals(AccountStatus.CLOSED))
+            throw new AccountStatusMismatchException("Account is already closed");
+        setAccountStatus(AccountStatus.CLOSED);
     }
 
 
