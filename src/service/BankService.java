@@ -1,9 +1,6 @@
 package service;
 
-import domain.account.Account;
-import domain.account.AccountStatus;
-import domain.account.AccountType;
-import domain.account.CheckingAccount;
+import domain.account.*;
 import domain.customer.Customer;
 import domain.ledger.Ledger;
 import domain.transaction.Transaction;
@@ -78,6 +75,16 @@ public class BankService {
         CheckingAccount account=new CheckingAccount(owner,currency, AccountStatus.ACTIVE, AccountType.CHECKING,overdraftLimit);
 
         //adding account into list and then assigning to owner
+        accounts.put(owner.getId(),account);
+        owner.addAccount(account);
+
+        return account;
+    }
+
+    public SavingsAccount openSavings(UUID customerId,Currency currency,Money minimumBalance,int monthlyLimit){
+        Customer owner=requireCustomer(customerId);
+        SavingsAccount account = new SavingsAccount(owner,currency,AccountStatus.ACTIVE,AccountType.SAVINGS,monthlyLimit,minimumBalance);
+
         accounts.put(owner.getId(),account);
         owner.addAccount(account);
 
