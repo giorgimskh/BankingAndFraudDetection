@@ -5,7 +5,7 @@ public class RuleResult {
     private final String reason;
 
 
-    private RuleResult(Decision decision, String reason) {
+    public RuleResult(Decision decision, String reason) {
         if(decision==null)
             throw new IllegalArgumentException("Decision cant be null");
         if(decision==Decision.ALLOW){

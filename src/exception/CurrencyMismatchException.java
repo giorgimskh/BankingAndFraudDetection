@@ -1,7 +1,7 @@
 package exception;
 
 
-public class CurrencyMismatchException extends Exception {
+public class CurrencyMismatchException extends RuntimeException {
     public CurrencyMismatchException() {
         super();
     }
