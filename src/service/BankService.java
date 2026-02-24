@@ -61,7 +61,7 @@ public class BankService {
         return c;
     }
 
-    public Customer getCustoemr(UUID customerId){
+    public Customer getCustomer(UUID customerId){
         return requireCustomer(customerId);
     }
 
@@ -89,6 +89,14 @@ public class BankService {
         owner.addAccount(account);
 
         return account;
+    }
+
+    public Account getAccount(UUID accountId){
+        return requireAccount(accountId);
+    }
+
+    public List<Account> listAccounts(){
+        return List.copyOf(accounts.values());
     }
 
     public Ledger getLedger() {
