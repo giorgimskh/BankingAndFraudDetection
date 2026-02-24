@@ -46,6 +46,7 @@ public class BankService {
         return accounts.get(id);
     }
 
+    //Creates customer
     public Customer createCustomer(String fullName){
         if(fullName==null)
             throw new IllegalArgumentException("FullName cant be null");
@@ -56,6 +57,14 @@ public class BankService {
         customers.put(c.getId(),c);
 
         return c;
+    }
+
+    public Customer getCustoemr(UUID customerId){
+        return requireCustomer(customerId);
+    }
+
+    public List<Customer> listCustomers(){
+        return List.copyOf(customers.values());
     }
 
 }
