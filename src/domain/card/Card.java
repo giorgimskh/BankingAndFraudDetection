@@ -45,4 +45,25 @@ public abstract class Card {
         this.spentToday = spentToday;
         this.spendDate = (spendDate == null) ? LocalDate.now() : spendDate;
         }
+
+
+        //Freezing only Active cards
+    public void freeze(){
+        if(cardStatus!=CardStatus.ACTIVE)
+            throw new IllegalStateException("CardStatus must be Active in order to freeze");
+
+        cardStatus=CardStatus.FROZEN;
     }
+
+    public void unfreeze(){
+        if(cardStatus!=CardStatus.FROZEN)
+            throw new IllegalStateException("CardStatus must be frozen to unfreeze");
+
+        cardStatus=CardStatus.ACTIVE;
+    }
+
+    public void close(){
+        cardStatus=CardStatus.CLOSED;
+    }
+
+}
