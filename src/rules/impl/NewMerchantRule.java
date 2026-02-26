@@ -7,7 +7,7 @@ import rules.FraudContext;
 import rules.FraudRule;
 import rules.RuleResult;
 
-public class NewMerchantRule implements FraudRule {
+public class NewMerchantRule {
     private final Decision decisionOnHit;
 
     public NewMerchantRule(Decision decisionOnHit) {
