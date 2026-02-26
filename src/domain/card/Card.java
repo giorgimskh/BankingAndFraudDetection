@@ -4,6 +4,8 @@ import domain.account.Account;
 import exception.CurrencyMismatchException;
 import domain.customer.Customer;
 import util.Money;
+
+import java.math.BigDecimal;
 import java.util.UUID;
 import java.time.LocalDate;
 
@@ -12,12 +14,11 @@ public abstract class Card {
     protected final Customer owner;
     protected final Account linkedAccount;
     protected  CardStatus cardStatus;
-    protected final Money dailyLimit;
+    protected  Money dailyLimit;
     protected  Money spentToday;
     protected  LocalDate spendDate;
 
-
-    protected Card(Customer owner, Account linkedAccount,Money dailyLimit, Money spentToday, LocalDate spendDate) {
+    protected Card(Customer owner, Account linkedAccount, Money dailyLimit) {
         if(owner==null)
             throw new IllegalArgumentException("Owner cant be null");
         if(linkedAccount==null)
@@ -26,13 +27,9 @@ public abstract class Card {
             throw new IllegalArgumentException("Owner of Linked Account does not match");
         if(dailyLimit==null)
             throw new IllegalArgumentException("Daily limit cant be null");
-        if(spentToday==null)
-            throw new IllegalArgumentException("spent Today cant be null");
         if(!dailyLimit.isPositive())
             throw new IllegalArgumentException("Daily limit must be positive");
         if(dailyLimit.getCurrency()!=linkedAccount.getCurrency())
-            throw new CurrencyMismatchException("Currencies does not match");
-        if(spentToday.getCurrency()!=linkedAccount.getCurrency())
             throw new CurrencyMismatchException("Currencies does not match");
 
         this.id = UUID.randomUUID();
@@ -40,8 +37,8 @@ public abstract class Card {
         this.linkedAccount = linkedAccount;
         this.cardStatus = CardStatus.ACTIVE;
         this.dailyLimit = dailyLimit;
-        this.spentToday = spentToday;
-        this.spendDate = (spendDate == null) ? LocalDate.now() : spendDate;
+        this.spentToday = new Money(BigDecimal.ZERO,linkedAccount.getCurrency());
+        this.spendDate = LocalDate.now();
         }
 
 
@@ -100,5 +97,33 @@ public abstract class Card {
             spentToday = Money.zero(linkedAccount.getCurrency());
             spendDate=today;
         }
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public Customer getOwner() {
+        return owner;
+    }
+
+    public Account getLinkedAccount() {
+        return linkedAccount;
+    }
+
+    public CardStatus getCardStatus() {
+        return cardStatus;
+    }
+
+    public Money getDailyLimit() {
+        return dailyLimit;
+    }
+
+    public Money getSpentToday() {
+        return spentToday;
+    }
+
+    public LocalDate getSpendDate() {
+        return spendDate;
     }
 }
