@@ -38,7 +38,7 @@ public class CardPayment extends Transaction{
     public void apply(){
         if (card.getCardStatus() != CardStatus.ACTIVE)
             throw new IllegalStateException("Card not active");
-        if(card.canAuthorize(getAmount()))
+        if(!card.canAuthorize(getAmount()))
             throw new IllegalStateException("Card cant authorize transaction");
 
         card.recordSpend(getAmount());
@@ -47,6 +47,8 @@ public class CardPayment extends Transaction{
 
     @Override
     public boolean involves(Account account) {
+        if(account==null)
+            throw new IllegalArgumentException("account cant be null");
         return account.getId().equals(card.getLinkedAccount().getId());
     }
 
