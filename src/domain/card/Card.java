@@ -17,7 +17,7 @@ public abstract class Card {
     protected  LocalDate spendDate;
 
 
-    protected Card(Customer owner, Account linkedAccount, CardStatus cardStatus, Money dailyLimit, Money spentToday, LocalDate spendDate) {
+    protected Card(Customer owner, Account linkedAccount,Money dailyLimit, Money spentToday, LocalDate spendDate) {
         if(owner==null)
             throw new IllegalArgumentException("Owner cant be null");
         if(linkedAccount==null)
@@ -28,8 +28,6 @@ public abstract class Card {
             throw new IllegalArgumentException("Daily limit cant be null");
         if(spentToday==null)
             throw new IllegalArgumentException("spent Today cant be null");
-        if(cardStatus==null)
-            throw new IllegalArgumentException("cardStatus cant be null");
         if(!dailyLimit.isPositive())
             throw new IllegalArgumentException("Daily limit must be positive");
         if(dailyLimit.getCurrency()!=linkedAccount.getCurrency())
@@ -40,7 +38,7 @@ public abstract class Card {
         this.id = UUID.randomUUID();
         this.owner = owner;
         this.linkedAccount = linkedAccount;
-        this.cardStatus = cardStatus;
+        this.cardStatus = CardStatus.ACTIVE;
         this.dailyLimit = dailyLimit;
         this.spentToday = spentToday;
         this.spendDate = (spendDate == null) ? LocalDate.now() : spendDate;
@@ -66,4 +64,41 @@ public abstract class Card {
         cardStatus=CardStatus.CLOSED;
     }
 
+    public boolean canAuthorize(Money amount) {
+        if (amount == null || !amount.isPositive()) return false;
+        if (cardStatus != CardStatus.ACTIVE) return false;
+        if (amount.getCurrency() != linkedAccount.getCurrency()) return false;
+
+        restoreDate();
+
+        Money projected = spentToday.addMoney(amount);
+        return projected.compareTo(dailyLimit) <= 0;
+    }
+
+
+    public void recordSpend(Money amount){
+        if(amount==null)
+            throw new IllegalArgumentException("Amount cant be null");
+        if(!amount.isPositive())
+            throw new IllegalArgumentException("Amount must be positive");
+        if(amount.getCurrency()!=linkedAccount.getCurrency())
+            throw new CurrencyMismatchException("Currencies does not match in recordSpend operation");
+
+        restoreDate();
+
+        Money projected = spentToday.addMoney(amount);
+        if (projected.compareTo(dailyLimit) > 0)
+            throw new IllegalStateException("Daily limit exceeded");
+
+        spentToday = projected;
+    }
+
+    public void restoreDate(){
+        LocalDate today = LocalDate.now();
+
+        if (!today.equals(spendDate)) {
+            spentToday = Money.zero(linkedAccount.getCurrency());
+            spendDate=today;
+        }
+    }
 }
