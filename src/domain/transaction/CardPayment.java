@@ -41,8 +41,8 @@ public class CardPayment extends Transaction{
         if(!card.canAuthorize(getAmount()))
             throw new IllegalStateException("Card cant authorize transaction");
 
-        card.recordSpend(getAmount());
         card.getLinkedAccount().withdraw(getAmount());
+        card.recordSpend(getAmount());
     }
 
     @Override
