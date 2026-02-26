@@ -1,6 +1,8 @@
 package rules;
 
 import domain.customer.Customer;
+
+import domain.transaction.CardPayment;
 import domain.transaction.Transaction;
 import exception.CurrencyMismatchException;
 import util.Currency;
@@ -11,6 +13,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 public class FraudContext {
     private final Customer customer;
@@ -95,6 +98,32 @@ public class FraudContext {
 
     public boolean hasAnyTransaction(){
         return !postedHistory.isEmpty();
+    }
+
+    public boolean hasSeenMerchant(UUID merchantId){
+        if(merchantId==null)
+            throw new IllegalArgumentException("merchantId cant be null");
+
+        for(Transaction tx : getPostedHistory()){
+            if (tx instanceof CardPayment cp) {
+                if (cp.getMerchant().getId().equals(merchantId))
+                    return true;
+            }
+        }
+
+        return false;
+    }
+
+    public String mostRecentCardCountry(){
+        List<Transaction> history = getPostedHistory();
+
+        for (int i = history.size() - 1; i >= 0; i--) {
+            Transaction tx = history.get(i);
+            if (tx instanceof CardPayment cp) {
+                return cp.getMerchant().getCountry();
+            }
+        }
+        return null;
     }
 
     public Transaction mostRecent(){
