@@ -6,6 +6,7 @@ import domain.customer.Customer;
 import util.Money;
 
 import java.math.BigDecimal;
+import java.util.Objects;
 import java.util.UUID;
 import java.time.LocalDate;
 
@@ -125,5 +126,17 @@ public abstract class Card {
 
     public LocalDate getSpendDate() {
         return spendDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Card card = (Card) o;
+        return Objects.equals(getId(), card.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
     }
 }
