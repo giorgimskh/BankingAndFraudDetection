@@ -47,4 +47,11 @@ public class CardPayment extends Transaction{
         return account==card.getLinkedAccount();
     }
 
+    public Card getCard() {
+        return card;
+    }
+
+    public Merchant getMerchant() {
+        return merchant;
+    }
 }
