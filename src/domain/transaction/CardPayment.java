@@ -52,7 +52,7 @@ public class CardPayment extends Transaction{
         return account.getId().equals(card.getLinkedAccount().getId());
     }
 
-    public Card getCard() {
+    public  Card getCard() {
         return card;
     }
 

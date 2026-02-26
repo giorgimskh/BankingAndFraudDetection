@@ -19,7 +19,7 @@ public abstract class Card {
     protected  Money spentToday;
     protected  LocalDate spendDate;
 
-    protected Card(Customer owner, Account linkedAccount, Money dailyLimit) {
+    public Card(Customer owner, Account linkedAccount, Money dailyLimit) {
         if(owner==null)
             throw new IllegalArgumentException("Owner cant be null");
         if(linkedAccount==null)

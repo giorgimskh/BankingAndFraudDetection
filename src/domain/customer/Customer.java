@@ -12,7 +12,7 @@ public class Customer {
     private final UUID id;
     private final String fullName;
     private final List<Account>accounts;
-    private final List<Card> cards=new ArrayList<>();
+    private final List<Card> cards;
 
     public Customer(String fullName) {
         if(fullName==null)
@@ -23,6 +23,7 @@ public class Customer {
         this.id = UUID.randomUUID();
         this.fullName = fullName;
         this.accounts = new ArrayList<>();
+        this.cards=new ArrayList<>();
     }
 
     @Override
