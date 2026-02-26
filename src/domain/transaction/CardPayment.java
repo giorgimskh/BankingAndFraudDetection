@@ -13,16 +13,18 @@ public class CardPayment extends Transaction{
 
 
     public CardPayment(Card card, Merchant merchant, Money amount,String description) {
+        super(amount,description);
         if(card==null)
             throw new IllegalArgumentException("Card cant be null");
         if(merchant==null)
             throw new IllegalArgumentException("Merchant cant be null");
+        if(card.getLinkedAccount()==null)
+            throw new IllegalArgumentException("Card Account is null");
         if(amount.getCurrency()!=card.getLinkedAccount().getCurrency())
             throw new CurrencyMismatchException("Currencies does not match");
         if(card.getCardStatus()!= CardStatus.ACTIVE)
             throw new IllegalArgumentException("Card Status must be active");
 
-        super(amount,description);
         this.card = card;
         this.merchant = merchant;
     }
@@ -34,17 +36,13 @@ public class CardPayment extends Transaction{
 
     @Override
     public void apply(){
-        try{
             card.getLinkedAccount().withdraw(getAmount());
             card.recordSpend(getAmount());
-        }catch (RuntimeException e){
-            System.out.println(e.getMessage());
-        }
     }
 
     @Override
     public boolean involves(Account account) {
-        return account==card.getLinkedAccount();
+        return account.getId().equals(card.getLinkedAccount().getId());
     }
 
     public Card getCard() {
