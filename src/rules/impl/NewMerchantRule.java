@@ -1,13 +1,13 @@
 package rules.impl;
 
+import domain.transaction.CardPayment;
 import domain.transaction.Transaction;
-import exception.CurrencyMismatchException;
 import rules.Decision;
 import rules.FraudContext;
 import rules.FraudRule;
 import rules.RuleResult;
 
-public class NewMerchantRule {
+public class NewMerchantRule implements FraudRule {
     private final Decision decisionOnHit;
 
     public NewMerchantRule(Decision decisionOnHit) {
@@ -24,4 +24,23 @@ public class NewMerchantRule {
     }
 
 
+    @Override
+    public RuleResult evaluate(Transaction tx, FraudContext ctx) {
+        if(tx==null)
+            throw new IllegalArgumentException("Transaction cant be null");
+        if(ctx==null)
+            throw new IllegalArgumentException("fraudContext cant be null");
+
+        if(!(tx instanceof CardPayment cp))
+            return RuleResult.allow();
+
+        if (!ctx.hasSeenMerchant(cp.getMerchant().getId())) {
+            String msg = "New merchant: " + cp.getMerchant().getName();
+            return (decisionOnHit == Decision.BLOCK)
+                    ? RuleResult.block(msg)
+                    : RuleResult.review(msg);
+        }
+
+        return RuleResult.allow();
+    }
 }
