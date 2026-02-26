@@ -27,6 +27,24 @@ public class CardPayment extends Transaction{
         this.merchant = merchant;
     }
 
+    @Override
+    public TransactionType type() {
+        return TransactionType.CARD_PAYMENT;
+    }
 
+    @Override
+    public void apply(){
+        try{
+            card.getLinkedAccount().withdraw(getAmount());
+            card.recordSpend(getAmount());
+        }catch (RuntimeException e){
+            System.out.println(e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean involves(Account account) {
+        return account==card.getLinkedAccount();
+    }
 
 }
