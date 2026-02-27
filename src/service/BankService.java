@@ -3,6 +3,7 @@ package service;
 import domain.account.*;
 import domain.card.Card;
 import domain.card.DebitCard;
+import domain.card.VirtualCard;
 import domain.customer.Customer;
 import domain.ledger.Ledger;
 import domain.transaction.Deposit;
@@ -255,6 +256,24 @@ public class BankService {
             throw new IllegalArgumentException("Owners does not match");
 
         DebitCard card=new DebitCard(customer,account,dailyLimit);
+        cards.put(card.getId(),card);
+        customer.addCard(card);
+
+        return card;
+    }
+
+    public VirtualCard issueVirtualCard(UUID customerId,UUID accountId,Money dailyLimit){
+        Account account=requireAccount(accountId);
+        Customer customer =requireCustomer(customerId);
+
+        if(dailyLimit==null || !dailyLimit.isPositive())
+            throw new IllegalArgumentException("Daily limit must be positive");
+        if(account.getCurrency()!=dailyLimit.getCurrency())
+            throw new CurrencyMismatchException("Currencies does not match");
+        if(!account.getOwner().getId().equals(customer.getId()))
+            throw new IllegalArgumentException("Owners does not match");
+
+        VirtualCard card=new VirtualCard(customer,account,dailyLimit);
         cards.put(card.getId(),card);
         customer.addCard(card);
 
