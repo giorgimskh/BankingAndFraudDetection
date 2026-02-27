@@ -17,7 +17,7 @@ public class Customer {
     public Customer(String fullName) {
         if(fullName==null)
             throw new IllegalArgumentException("Full name must be non-empty");
-        if(fullName.isEmpty())
+        if(fullName.isBlank())
             throw new IllegalArgumentException("Full name must not be blank");
 
         this.id = UUID.randomUUID();
