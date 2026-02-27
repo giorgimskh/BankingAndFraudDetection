@@ -82,6 +82,17 @@ public class Customer {
         cards.add(card);
     }
 
+    public Card findCard(UUID cardId) {
+        if (cardId == null)
+            throw new IllegalArgumentException("Card id can't be null");
+
+        for (Card c : cards) {
+            if (c.getId().equals(cardId))
+                return c;
+        }
+
+        throw new IllegalArgumentException("Card not found");
+    }
 
 
     public UUID getId() {
