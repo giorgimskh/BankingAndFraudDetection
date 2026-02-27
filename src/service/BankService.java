@@ -1,6 +1,7 @@
 package service;
 
 import domain.account.*;
+import domain.card.Card;
 import domain.customer.Customer;
 import domain.ledger.Ledger;
 import domain.transaction.Deposit;
@@ -21,7 +22,7 @@ public class BankService {
     private final Map<UUID, Customer> customers=new HashMap<>();
     private final Map<UUID, Account> accounts=new HashMap<>();
     private final List<Transaction> attempts=new ArrayList<>();
-
+    private final Map<UUID, Card> cards=new HashMap<>();
 
     public BankService(Ledger ledger, FraudEngine fraudEngine) {
         if(ledger==null)
@@ -217,5 +218,19 @@ public class BankService {
             }
         }
         return List.copyOf(result);
+    }
+
+    private Card requireCard(UUID id){
+        if(id==null)
+            throw new IllegalArgumentException("Id cant be null");
+        if(!cards.containsKey(id))
+            throw new IllegalArgumentException("Such id cant be found in cards");
+
+        //check if card is null
+        Card card=cards.get(id);
+        if(card==null)
+            throw new IllegalStateException("Card is null");
+
+        return card;
     }
 }
