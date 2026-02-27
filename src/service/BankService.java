@@ -202,11 +202,14 @@ public class BankService {
             }else if(RuleResult.isReview(rr)){
                 transfer.markReview();
                 attempts.add(transfer);
+                System.out.println(rr.getReason());
             }else{
                 transfer.decline();
                 attempts.add(transfer);
+                System.out.println(rr.getReason());
             }
         } catch (RuntimeException e) {
+            attempts.add(transfer);
             System.out.println(e.getMessage());
         }
         return transfer;
