@@ -126,11 +126,11 @@ public class BankService {
         try{
             tx.approve();
             ledger.post(tx);
+            System.out.println("Successful deposit");
         }catch (RuntimeException e){
             attempts.add(tx);
             System.out.println(e.getMessage());
         }
-        System.out.println("Successful deposit");
         return tx;
     }
 
