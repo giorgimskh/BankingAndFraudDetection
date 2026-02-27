@@ -237,11 +237,7 @@ public class BankService {
             throw new IllegalArgumentException("Such id cant be found in cards");
 
         //check if card is null
-        Card card=cards.get(id);
-        if(card==null)
-            throw new IllegalStateException("Card is null");
-
-        return card;
+        return cards.get(id);
     }
 
     public DebitCard issueDebitCard(UUID customerId,UUID accountId,Money dailyLimit){
