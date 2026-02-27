@@ -141,17 +141,21 @@ public class BankService {
 
         RuleResult rr=fraudEngine.assess(tx,ctx);
 
-        if (RuleResult.isAllow(rr)) {
-            tx.approve();
-            ledger.post(tx);
-        } else if (RuleResult.isReview(rr)) {
-            tx.markReview();
+        try {
+            if (RuleResult.isAllow(rr)) {
+                tx.approve();
+                ledger.post(tx);
+            } else if (RuleResult.isReview(rr)) {
+                tx.markReview();
+                attempts.add(tx);
+            } else { // BLOCK
+                tx.decline();
+                attempts.add(tx);
+            }
+        }catch (RuntimeException e){
             attempts.add(tx);
-        } else { // BLOCK
-            tx.decline();
-            attempts.add(tx);
+            System.out.println(e.getMessage());
         }
-
         return tx;
     }
 
