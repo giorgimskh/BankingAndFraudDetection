@@ -69,6 +69,21 @@ public class Customer {
         throw new IllegalArgumentException("Account has not be found");
     }
 
+    public void addCard(Card card) {
+        if (card == null)
+            throw new IllegalArgumentException("Card can't be null");
+
+        if (!card.getLinkedAccount().getOwner().getId().equals(this.id))
+            throw new IllegalArgumentException("Card owner must match customer");
+
+        if (cards.contains(card))
+            throw new IllegalArgumentException("Card already added");
+
+        cards.add(card);
+    }
+
+
+
     public UUID getId() {
         return id;
     }
