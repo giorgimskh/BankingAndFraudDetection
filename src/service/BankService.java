@@ -6,10 +6,8 @@ import domain.card.DebitCard;
 import domain.card.VirtualCard;
 import domain.customer.Customer;
 import domain.ledger.Ledger;
-import domain.transaction.Deposit;
-import domain.transaction.Transaction;
-import domain.transaction.Transfer;
-import domain.transaction.Withdrawal;
+import domain.merchant.Merchant;
+import domain.transaction.*;
 import exception.CurrencyMismatchException;
 import rules.FraudContext;
 import rules.FraudEngine;
@@ -278,5 +276,41 @@ public class BankService {
         customer.addCard(card);
 
         return card;
+    }
+
+    public Transaction payByCard(UUID cardID, Merchant merchant,Money amount,String description) {
+        Card card = requireCard(cardID);
+
+        if (merchant == null)
+            throw new IllegalArgumentException("Merchant cant be null");
+        if (description==null|| description.isBlank())
+            throw new IllegalArgumentException("description cant be empty");
+        if (card.getLinkedAccount().getCurrency() != amount.getCurrency())
+            throw new CurrencyMismatchException("Currencies does not match");
+
+        Transaction tx = new CardPayment(card, merchant, amount, description);
+        List<Transaction> hist = getCustomerHistory(card.getOwner());
+        FraudContext ctx = new FraudContext(card.getOwner(), hist);
+
+        RuleResult rr = fraudEngine.assess(tx, ctx);
+
+        try{
+            if(RuleResult.isAllow(rr)){
+                tx.approve();
+                ledger.post(tx);
+            }else if(RuleResult.isReview(rr)){
+                tx.markReview();
+                attempts.add(tx);
+                System.out.println(rr.getReason());
+            }else{
+                tx.decline();
+                attempts.add(tx);
+                System.out.println(rr.getReason());
+            }
+        } catch (RuntimeException e) {
+            attempts.add(tx);
+            System.out.println(e.getMessage());
+        }
+        return tx;
     }
 }
