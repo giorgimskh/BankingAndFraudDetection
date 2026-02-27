@@ -128,7 +128,7 @@ public class BankService {
             attempts.add(tx);
             System.out.println(e.getMessage());
         }
-
+        System.out.println("Successful deposit");
         return tx;
     }
 
