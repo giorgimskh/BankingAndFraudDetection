@@ -146,6 +146,7 @@ public class BankService {
             if (RuleResult.isAllow(rr)) {
                 tx.approve();
                 ledger.post(tx);
+                System.out.println("Successful withdraw");
             } else if (RuleResult.isReview(rr)) {
                 tx.markReview();
                 attempts.add(tx);
@@ -200,6 +201,7 @@ public class BankService {
             if(RuleResult.isAllow(rr)){
                 transfer.approve();
                 ledger.post(transfer);
+                System.out.println("Successful transfer");
             }else if(RuleResult.isReview(rr)){
                 transfer.markReview();
                 attempts.add(transfer);
