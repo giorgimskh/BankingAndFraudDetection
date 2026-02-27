@@ -321,4 +321,8 @@ public class BankService {
     public Card getCard(UUID cardId){
         return requireCard(cardId);
     }
+
+    public List<Card> listCustomerCards(UUID customerId ) {
+        return requireCustomer(customerId).getCards();
+    }
 }
