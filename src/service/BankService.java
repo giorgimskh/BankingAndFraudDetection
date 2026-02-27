@@ -313,4 +313,12 @@ public class BankService {
         }
         return tx;
     }
+
+    public List<Card> listCards() {
+        return List.copyOf(cards.values());
+    }
+
+    public Card getCard(UUID cardId){
+        return requireCard(cardId);
+    }
 }
