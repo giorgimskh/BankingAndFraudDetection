@@ -30,7 +30,7 @@ public class FraudEngine{
 
             if(result.getDecision()==Decision.BLOCK)
                 return result;
-            if(result.getDecision()==Decision.REVIEW && result.getDecision()==Decision.ALLOW)
+            if(result.getDecision()==Decision.REVIEW || result.getDecision()==Decision.ALLOW)
                 best=result;
         }
 
