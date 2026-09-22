@@ -1,178 +1,265 @@
-# 💳 BankingAndFraudDetection
-A Rule-Driven Banking and Fraud Detection System (Java OOP Project)
+# BankingAndFraudDetection
 
----
+A rule-driven banking and fraud detection system, built in Java as an OOP design exercise.
 
-## 📌 Overview
+## Overview
 
-BankingAndFraudDetection is a console-based banking simulation system designed to demonstrate advanced Object-Oriented Programming principles in Java.
+BankingAndFraudDetection is a console-based banking simulation. It models:
 
-The system models:
+- Customers
+- Bank accounts (Checking, Savings)
+- Cards (Debit, Virtual)
+- Transactions (Deposit, Withdrawal, Transfer, Card Payment)
+- A ledger for financial consistency
+- A rule-based fraud detection engine
 
-- 👤 Customers
-- 🏦 Bank Accounts (Checking, Savings)
-- 💳 Cards (Debit, Virtual)
-- 💰 Transactions (Deposit, Withdrawal, Transfer, Card Payment)
-- 📒 A Ledger for financial consistency
-- 🛡️ A Rule-Based Fraud Detection Engine
+The design emphasizes inheritance, polymorphism, encapsulation, composition, and separation of concerns, and is implemented with plain Java (no external frameworks or build tools) targeting Java 21+.
 
-The architecture emphasizes inheritance, polymorphism, encapsulation, composition, and separation of concerns.
+## Core Features
 
----
-
-## 🚀 Core Features
-
-### 👤 Customer Management
+### Customer Management
 - Create customers
 - Each customer can own multiple accounts
 - Each customer can hold multiple cards
 
-### 🏦 Account System
+### Account System
 - Open Checking or Savings accounts
-- Deposit funds
-- Withdraw funds
+- Deposit and withdraw funds
 - Transfer between accounts
 - Account status handling (ACTIVE, FROZEN, CLOSED)
 
-### 💳 Card Payments
-- Issue debit cards linked to accounts
-- Daily spending limits
+### Card Payments
+- Issue debit or virtual cards linked to an account
+- Daily spending limits, reset per calendar day
 - Card authorization logic
 - Merchant-based payments
 
----
-
-## 💰 Transactions
+## Transactions
 
 Supported transaction types:
 
-- ➕ Deposit
-- ➖ Withdrawal
-- 🔁 Transfer
-- 🛒 CardPayment
+- Deposit
+- Withdrawal
+- Transfer
+- CardPayment
 
 Each transaction:
 
-- Has a unique ID
-- Has a timestamp
+- Has a unique ID and a timestamp
 - Has a status (CREATED, APPROVED, REVIEW, DECLINED, POSTED)
-- Is stored in a central Ledger
-- Becomes immutable after posting
+- Is recorded in a central Ledger
+- Becomes immutable once posted
 
----
+## Fraud Detection Engine
 
-## 🛡️ Fraud Detection Engine
+Risky transactions (withdrawal, transfer, card payment) are evaluated by the `FraudEngine` before posting. Each `FraudRule` implementation returns a decision:
 
-All risky transactions (withdrawal, transfer, card payment) are evaluated before posting.
+- ALLOW - transaction is posted and balances update
+- REVIEW - transaction is recorded but balances do not change
+- BLOCK - transaction is declined and balances do not change
 
-Fraud rules return one of:
+The engine runs all configured rules and applies the most severe decision. Current rule implementations:
 
-- ✅ ALLOW
-- ⚠️ REVIEW
-- ❌ BLOCK
+- `LargeAmountRule` - flags transactions above a fixed threshold
+- `DailySpendLimitRule` - flags spend past a card's or account's daily limit
+- `VelocitySumRule` - flags total spend above a threshold within a time window
+- `TooManyTransactionsRule` - flags too many transactions within a time window
+- `NewMerchantRule` - flags payments to a merchant not seen before
+- `RapidLocationChangeRule` - flags transactions in different countries too close together in time
 
-Behavior:
-
-- ✅ ALLOW → Transaction is posted and balances update.
-- ⚠️ REVIEW → Transaction is stored but balances do not change.
-- ❌ BLOCK → Transaction is declined and balances do not change.
-
-Example rule types:
-
-- 💵 Large amount threshold rule
-- 📊 Daily spending limit rule
-- ⏱️ High transaction frequency rule
-- 🏪 New merchant rule
-- 🌍 Rapid location change rule
-
----
-
-## 🏗️ Architecture
+## Architecture
 
 Project structure:
 
-domain/
-    customer/
-    account/
-    card/
-    transaction/
+```
+src/
+├── Main.java
+├── domain/
+│   ├── customer/     Customer
+│   ├── account/      Account (abstract), CheckingAccount, SavingsAccount
+│   ├── card/         Card (abstract), DebitCard, VirtualCard
+│   ├── transaction/  Transaction (abstract), Deposit, Withdrawal, Transfer, CardPayment
+│   ├── ledger/       Ledger
+│   └── merchant/     Merchant
+├── rules/
+│   ├── FraudRule, FraudEngine, FraudContext, RuleResult, Decision
+│   └── impl/         individual rule implementations
+├── service/
+│   └── BankService   application facade
+├── exception/         domain-specific runtime exceptions
+└── util/              Money, Currency
+```
 
-rules/
-service/
-storage/
-exceptions/
-util/
+### Domain Layer
+Business entities: `Customer`, the `Account` hierarchy, the `Card` hierarchy, the `Transaction` hierarchy, `Ledger`, and `Merchant`.
 
----
+### Rules Layer
+`FraudRule` interface, its implementations, and `FraudEngine`, which evaluates a transaction against all configured rules using the current `FraudContext`.
 
-### 📦 Domain Layer
-Contains business entities:
+### Service Layer
+`BankService` is the application facade. It holds in-memory state (customers, accounts, cards) and coordinates the domain model, the ledger, and the fraud engine for every operation.
 
-- Customer
-- Account (abstract)
-- CheckingAccount
-- SavingsAccount
-- Card (abstract)
-- DebitCard
-- Transaction hierarchy
-- Ledger
+### Util Layer
+`Money` and `Currency` provide immutable, currency-safe arithmetic used throughout the domain layer.
 
-### 🧠 Rules Layer
-- FraudRule interface
-- Rule implementations
-- FraudEngine
+There is no separate storage or persistence layer - `BankService` keeps all state in memory for the duration of the program.
 
-### 🛠️ Service Layer
-- BankService (application façade)
-- Coordinates repositories, ledger, and fraud engine
+## Architecture Diagram
 
-### 🗄️ Storage Layer
-- In-memory repositories
-- No external database required
+```mermaid
+classDiagram
+    class Customer {
+        +UUID id
+        +String fullName
+        +addAccount(Account)
+        +addCard(Card)
+    }
 
----
+    class Account {
+        <<abstract>>
+        +UUID id
+        +Money balance
+        +Currency currency
+        +AccountStatus accountStatus
+        +deposit(Money)
+        +withdraw(Money)
+        +canWithdraw(Money) bool*
+    }
+    class CheckingAccount {
+        +Money overdraftLimit
+    }
+    class SavingsAccount {
+        +Money minimumBalance
+        +int monthlyWithdrawalLimit
+    }
 
-## 🧩 Design Principles
+    class Card {
+        <<abstract>>
+        +UUID id
+        +CardStatus cardStatus
+        +Money dailyLimit
+        +Money spentToday
+        +canAuthorize(Money) bool
+        +recordSpend(Money)
+    }
+    class DebitCard
+    class VirtualCard
 
-- 🔒 Encapsulation: Account balances cannot be modified directly.
-- 🧬 Inheritance: Account, Transaction, and Card hierarchies.
-- 🔄 Polymorphism: Transaction posting and fraud rule evaluation.
-- 🧱 Composition: Customer owns Accounts and Cards.
-- 🎯 Strategy Pattern: FraudRule implementations.
-- 🏛️ Clear separation between domain, service, and storage layers.
+    class Transaction {
+        <<abstract>>
+        +UUID id
+        +Money amount
+        +TransactionStatus status
+        +apply() void*
+        +involves(Account) bool*
+    }
+    class Deposit
+    class Withdrawal
+    class Transfer
+    class CardPayment
 
----
+    class Merchant {
+        +UUID id
+        +String name
+        +String countryCode
+    }
 
-## 📏 System Invariants
+    class Ledger {
+        +post(Transaction)
+        +statementFor(Account) List~Transaction~
+    }
 
-- 💰 Money is immutable.
-- 📒 Account balances change only through Ledger posting.
-- 🔁 Transactions are atomic (no partial transfer).
-- 🌐 Currency mismatch is disallowed.
-- 🛑 Fraud REVIEW or BLOCK never alters balances.
+    class FraudRule {
+        <<interface>>
+        +evaluate(Transaction, FraudContext) RuleResult
+    }
+    class FraudEngine {
+        +assess(Transaction, FraudContext) RuleResult
+    }
+    class RuleResult {
+        +Decision decision
+        +String reason
+    }
+    class LargeAmountRule
+    class DailySpendLimitRule
+    class VelocitySumRule
+    class TooManyTransactionsRule
+    class NewMerchantRule
+    class RapidLocationChangeRule
 
----
+    class BankService {
+        +deposit(...)
+        +withdraw(...)
+        +transfer(...)
+        +payByCard(...)
+        +issueDebitCard(...)
+    }
 
-## 🧪 Example Scenario
+    Account <|-- CheckingAccount
+    Account <|-- SavingsAccount
+    Card <|-- DebitCard
+    Card <|-- VirtualCard
+    Transaction <|-- Deposit
+    Transaction <|-- Withdrawal
+    Transaction <|-- Transfer
+    Transaction <|-- CardPayment
 
-1. 👤 Create Customer
-2. 🏦 Open Checking Account (EUR)
-3. ➕ Deposit 1000 EUR
-4. 💳 Issue Debit Card (daily limit: 500 EUR)
-5. 🛒 Card Payment 200 EUR → ✅ ALLOW → balance becomes 800 EUR
-6. 🛒 Card Payment 600 EUR → ❌ BLOCK → balance remains 800 EUR
+    Customer "1" *-- "many" Account
+    Customer "1" *-- "many" Card
+    Card --> Account : linkedAccount
+    CardPayment --> Merchant
+    Ledger --> Transaction : history
 
----
+    FraudRule <|.. LargeAmountRule
+    FraudRule <|.. DailySpendLimitRule
+    FraudRule <|.. VelocitySumRule
+    FraudRule <|.. TooManyTransactionsRule
+    FraudRule <|.. NewMerchantRule
+    FraudRule <|.. RapidLocationChangeRule
+    FraudEngine o-- FraudRule
+    FraudEngine --> RuleResult
 
-## 🎯 Project Goal
+    BankService --> Ledger
+    BankService --> FraudEngine
+    BankService --> Customer
+    BankService --> Account
+    BankService --> Card
+```
 
-This project reinforces:
+## Design Principles
 
-- 💻 Advanced Java OOP structure
-- 🧠 Domain modeling
-- 🏗️ Clean layered architecture
-- 🛡️ Rule-based system design
-- 💼 Realistic financial system simulation
+- Encapsulation: account balances cannot be modified directly, only through `deposit`/`withdraw`.
+- Inheritance: `Account`, `Card`, and `Transaction` hierarchies.
+- Polymorphism: transaction posting (`apply()`) and fraud rule evaluation.
+- Composition: `Customer` owns its `Account`s and `Card`s.
+- Strategy pattern: `FraudRule` implementations plugged into `FraudEngine`.
+- Clear separation between domain, rules, and service layers.
 
-No external frameworks are required.  
-The system is fully self-contained and intended for educational purposes.
+## System Invariants
+
+- `Money` is immutable.
+- Account balances change only through `Ledger` posting.
+- Transactions are atomic - no partial transfers.
+- A currency mismatch between operands raises `CurrencyMismatchException`.
+- A fraud decision of REVIEW or BLOCK never alters balances.
+
+## Example Scenario
+
+The scripted demo in `Main.java` runs the following flow:
+
+1. Create a customer
+2. Open a checking account
+3. Deposit funds
+4. Issue a debit card with a daily limit
+5. Card payment within the limit - ALLOW, balance decreases
+6. Card payment exceeding the daily limit - BLOCK, balance unchanged
+7. Card payment in a different country shortly after - flagged by the rapid location change rule
+8. Withdraw funds
+9. Open a savings account
+10. Transfer funds between accounts
+
+## Notes
+
+- Pure JDK, no external dependencies or build tool (no Maven/Gradle).
+- Targets Java 21+ and uses preview features: unnamed classes/instance main methods in `Main.java`, and `SequencedCollection` (`List.reversed()`, `getLast()`).
+- No automated test suite - `Main.java` acts as a scripted smoke test covering the main flows.
